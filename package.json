@@ -1,0 +1,13 @@
+{
+  "name": "evermind",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace @evermind/web run dev",
+    "build:web": "npm --workspace @evermind/web run build"
+  }
+}

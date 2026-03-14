@@ -1,4 +1,31 @@
 .flow-panel {
+  position: relative;
   height: 100vh;
   background: #fff;
+}
+
+.flow-panel__status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.flow-panel__status--connected {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.flow-panel__status--connecting {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.flow-panel__status--disconnected {
+  background: #fef2f2;
+  color: #dc2626;
 }

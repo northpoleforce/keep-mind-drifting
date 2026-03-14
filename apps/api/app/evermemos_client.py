@@ -171,7 +171,7 @@ class EvermemosClient(MemoryGateway):
     def _ensure_accepted_status(self, response: Any) -> None:
         status = str(getattr(response, "status", "")).strip().lower()
         message = str(getattr(response, "message", "Unknown error"))
-        if status in {"success", "ok", "queued", "accepted", "processing"}:
+        if not status or status in {"success", "ok", "queued", "accepted", "processing"}:
             return
         raise RuntimeError(message)
 

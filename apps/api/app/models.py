@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field
@@ -27,7 +27,7 @@ class MessageRecord(BaseModel):
     message_id: str
     role: str
     text: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     topic_node_id: str
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -39,7 +39,7 @@ class TopicNodeRecord(BaseModel):
     parent_topic_node_id: Optional[str] = None
     topic_summary: str
     confidence: float
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -61,7 +61,7 @@ class FlowEvent(BaseModel):
     node_id: str
     parent_node_id: Optional[str]
     summary: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class MockNodeRequest(BaseModel):

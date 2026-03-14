@@ -1,6 +1,36 @@
+from __future__ import annotations
+
+import time
 from collections import defaultdict, deque
+from typing import Generic, TypeVar
 
 from .models import ContextItem
+
+V = TypeVar("V")
+
+
+class TTLDict(Generic[V]):
+    """Dict with per-key TTL expiry. Not thread-safe — intended for single-worker use."""
+
+    def __init__(self, ttl_seconds: float = 3600) -> None:
+        self._ttl = ttl_seconds
+        self._data: dict[str, tuple[float, V]] = {}
+
+    def get(self, key: str, default: V | None = None) -> V | None:
+        entry = self._data.get(key)
+        if entry is None:
+            return default
+        ts, val = entry
+        if time.monotonic() - ts > self._ttl:
+            del self._data[key]
+            return default
+        return val
+
+    def __setitem__(self, key: str, value: V) -> None:
+        self._data[key] = (time.monotonic(), value)
+
+    def __contains__(self, key: str) -> bool:
+        return self.get(key) is not None
 
 
 class SessionCache:

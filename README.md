@@ -2,6 +2,29 @@
 
 Evermemos-first demo skeleton for "thought flow" visualization.
 
+## Env Layout
+
+- Frontend env: `/.env` (Vite variables only, e.g. `VITE_API_BASE_URL`)
+- Backend env: `apps/api/.env` (API secrets and runtime settings)
+
+Setup:
+
+```bash
+# from repo root
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+```
+
+Fill real keys in `apps/api/.env`:
+
+- `LLM_API_KEY`
+- `EVERMEMOS_API_KEY`
+
+Backend loads env in this order:
+
+1. `/.env` (fallback)
+2. `apps/api/.env` (override, recommended source of truth)
+
 ## Structure
 
 - `apps/api`: FastAPI backend (runnable now)

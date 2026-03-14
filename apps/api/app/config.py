@@ -1,19 +1,34 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+API_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # Load order: repo-root .env (fallback) -> apps/api/.env (override)
+    # This keeps backend config stable no matter where uvicorn is launched from.
+    model_config = SettingsConfigDict(
+        env_file=(str(REPO_ROOT / ".env"), str(API_DIR / ".env")),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     app_env: str = Field(default="development", alias="APP_ENV")
     app_host: str = Field(default="0.0.0.0", alias="APP_HOST")
     app_port: int = Field(default=8000, alias="APP_PORT")
+    # Legacy single-origin setting. Kept for backward compatibility.
     frontend_origin: str = Field(default="http://localhost:5173", alias="FRONTEND_ORIGIN")
+    # Comma-separated origins for CORS, e.g.
+    # FRONTEND_ORIGINS=http://localhost:5173,http://localhost:5174
+    frontend_origins: str = Field(default="", alias="FRONTEND_ORIGINS")
 
     evermemos_base_url: Optional[str] = Field(default=None, alias="EVERMEMOS_BASE_URL")
     evermemos_api_key: str = Field(default="demo-key", alias="EVERMEMOS_API_KEY")
@@ -41,6 +56,35 @@ class Settings(BaseSettings):
 
     retrieval_cache_weight: float = Field(default=0.6, alias="RETRIEVAL_CACHE_WEIGHT")
     retrieval_memory_weight: float = Field(default=0.4, alias="RETRIEVAL_MEMORY_WEIGHT")
+
+    # Topic detection — can point to a lighter / non-thinking model to save tokens.
+    # Defaults to None, which means reuse llm_model.
+    topic_detection_model: Optional[str] = Field(default=None, alias="TOPIC_DETECTION_MODEL")
+    # Must be high enough for thinking models (Kimi K2, DeepSeek-R1, etc.) to
+    # exhaust their <think> block *and* still emit the JSON answer.
+    topic_detection_max_tokens: int = Field(default=2048, alias="TOPIC_DETECTION_MAX_TOKENS")
+
+    def get_frontend_origins(self) -> list[str]:
+        """Return deduplicated allowed frontend origins for CORS."""
+        # Keep old FRONTEND_ORIGIN working and merge with FRONTEND_ORIGINS.
+        origins = [self.frontend_origin]
+        if self.frontend_origins.strip():
+            origins.extend([item.strip() for item in self.frontend_origins.split(",") if item.strip()])
+
+        # Developer-friendly defaults to avoid local port churn breaking CORS.
+        dev_defaults = [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+        ]
+        origins.extend(dev_defaults)
+
+        deduped: list[str] = []
+        for origin in origins:
+            if origin not in deduped:
+                deduped.append(origin)
+        return deduped
 
 
 @lru_cache(maxsize=1)

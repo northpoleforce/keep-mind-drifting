@@ -1,8 +1,11 @@
+export type { FlowNodeCreatedEvent } from "@evermind/shared";
+
 export type ChatMessage = {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "error";
   text: string;
   topicNodeId?: string;
+  topicSummary?: string;
   contextItemsUsed?: number;
   timestamp: number;
 };

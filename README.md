@@ -42,6 +42,12 @@ Evermind is a demo of an AI chat experience powered by **evermemos**: while you 
 - `packages/shared`: shared TypeScript contracts
 - `docs`: product/architecture/deployment notes
 
+### Memory Architecture (Intuitive View) | 记忆架构直观图
+
+![Evermind Memory Architecture](resource/memory-arch.png)
+
+*这张图展示了“Queen Bee + Worker Bees”的记忆协作方式：主模型负责全局理解，主题记忆单元负责细节检索，再汇总生成完整回复。*
+
 Core API routes:
 
 - `POST /chat`
@@ -177,4 +183,6 @@ You can switch to any provider exposing OpenAI-compatible chat completions by ch
 
 ## License
 
-Internal demo scaffold. Add an explicit license before public release.
+This project is released under the **Unlicense**.
+
+You can use it for personal, academic, or commercial purposes with virtually no restrictions. See `LICENSE` for full text.
